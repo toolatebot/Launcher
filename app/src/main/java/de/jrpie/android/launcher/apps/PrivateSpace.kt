@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import de.jrpie.android.launcher.R
 import de.jrpie.android.launcher.isDefaultHomeScreen
@@ -98,11 +99,7 @@ fun lockPrivateSpace(context: Context, lock: Boolean) {
     if (!isPrivateSpaceSupported()) {
         return
     }
-
-    // silently return when trying to unlock but hide when locked is set
-    if (!lock && hidePrivateSpaceWhenLocked(context)) {
-        return
-    }
+    Log.i("Launcher", if (lock) "Locking" else "Unlocking" + " private space")
 
     val userManager = context.getSystemService(Context.USER_SERVICE) as UserManager
     val privateSpaceUser = getPrivateSpaceUser(context) ?: return
