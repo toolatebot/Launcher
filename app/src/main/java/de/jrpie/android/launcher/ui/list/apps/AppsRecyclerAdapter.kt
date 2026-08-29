@@ -51,7 +51,7 @@ class AppsRecyclerAdapter(
     private val appsListDisplayed: MutableList<AbstractDetailedAppInfo> = mutableListOf()
     private val theme = LauncherPreferences.theme()
     private val colorTheme = theme.colorTheme()
-    private val grayscale = theme.monochromeIcons()
+    private val grayscale = colorTheme.monochromeIcons()
 
     // temporarily disable auto launch
     var disableAutoLaunch: Boolean = false

@@ -117,7 +117,7 @@ class SelectWidgetActivity : UIObjectActivity() {
 
         private val theme = LauncherPreferences.theme()
         private val colorTheme = theme.colorTheme()
-        private val grayscale = theme.monochromeIcons()
+        private val grayscale = colorTheme.monochromeIcons()
 
         private val widgets = getAppWidgetProviders(this@SelectWidgetActivity).toTypedArray()
 
