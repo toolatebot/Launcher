@@ -14,7 +14,9 @@ import androidx.recyclerview.widget.RecyclerView
 import de.jrpie.android.launcher.Application
 import de.jrpie.android.launcher.R
 import de.jrpie.android.launcher.databinding.ActivitySelectWidgetBinding
+import de.jrpie.android.launcher.preferences.LauncherPreferences
 import de.jrpie.android.launcher.ui.UIObjectActivity
+import de.jrpie.android.launcher.ui.transformMonochrome
 import de.jrpie.android.launcher.widgets.ClockWidget
 import de.jrpie.android.launcher.widgets.LauncherAppWidgetProvider
 import de.jrpie.android.launcher.widgets.LauncherClockWidgetProvider
@@ -113,6 +115,10 @@ class SelectWidgetActivity : UIObjectActivity() {
     inner class SelectWidgetRecyclerAdapter() :
         RecyclerView.Adapter<SelectWidgetRecyclerAdapter.ViewHolder>() {
 
+        private val theme = LauncherPreferences.theme()
+        private val colorTheme = theme.colorTheme()
+        private val grayscale = theme.monochromeIcons()
+
         private val widgets = getAppWidgetProviders(this@SelectWidgetActivity).toTypedArray()
 
         inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
@@ -145,6 +151,7 @@ class SelectWidgetActivity : UIObjectActivity() {
                 }
 
             viewHolder.iconView.setImageDrawable(widgets[i].icon)
+            viewHolder.iconView.transformMonochrome(grayscale, colorTheme)
 
             val preview = widgets[i].previewImage
             viewHolder.previewView.setImageDrawable(preview)
@@ -154,6 +161,8 @@ class SelectWidgetActivity : UIObjectActivity() {
                 } else {
                     View.GONE
                 }
+
+            viewHolder.previewView.transformMonochrome(grayscale, colorTheme)
 
             viewHolder.previewView.requestLayout()
         }
