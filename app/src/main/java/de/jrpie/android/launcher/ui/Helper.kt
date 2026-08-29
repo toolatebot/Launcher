@@ -3,6 +3,7 @@ package de.jrpie.android.launcher.ui
 import android.app.Activity
 import android.content.Context
 import android.graphics.ColorMatrixColorFilter
+import android.graphics.drawable.Drawable
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
@@ -29,6 +30,14 @@ fun View.blink(
 
 // Taken from: https://stackoverflow.com/a/30340794/12787264
 fun ImageView.transformMonochrome(grayscale: Boolean, theme: ColorTheme) {
+    this.colorFilter = if (grayscale) {
+        ColorMatrixColorFilter(theme.monochromeMatrix)
+    } else {
+        null
+    }
+}
+
+fun Drawable.transformMonochrome(grayscale: Boolean, theme: ColorTheme) {
     this.colorFilter = if (grayscale) {
         ColorMatrixColorFilter(theme.monochromeMatrix)
     } else {
