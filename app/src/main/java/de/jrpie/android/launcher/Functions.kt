@@ -239,16 +239,25 @@ fun getApps(
  */
 @RequiresApi(Build.VERSION_CODES.R)
 fun getAppShortcuts(appInfo: AppInfo, context: Context): List<ShortcutInfo> {
+    if (!isDefaultHomeScreen(context)) {
+        return emptyList()
+    }
     val launcherApps = context.getSystemService(Service.LAUNCHER_APPS_SERVICE) as LauncherApps
     val userHandle = getUserFromId(appInfo.user, context)
-    return launcherApps.getShortcuts(
-        ShortcutQuery().apply {
-            setPackage(appInfo.packageName)
-            setQueryFlags(ShortcutQuery.FLAG_MATCH_DYNAMIC
-                or ShortcutQuery.FLAG_MATCH_MANIFEST)
-        },
-        userHandle
-    ) ?: emptyList()
+    return try {
+        launcherApps.getShortcuts(
+            ShortcutQuery().apply {
+                setPackage(appInfo.packageName)
+                setQueryFlags(
+                    ShortcutQuery.FLAG_MATCH_DYNAMIC
+                            or ShortcutQuery.FLAG_MATCH_MANIFEST
+                )
+            },
+            userHandle
+        ) ?: emptyList()
+    } catch (_: Exception) {
+        emptyList()
+    }
 }
 
 /*
