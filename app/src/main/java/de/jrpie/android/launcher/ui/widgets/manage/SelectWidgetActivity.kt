@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import de.jrpie.android.launcher.Application
@@ -16,6 +17,7 @@ import de.jrpie.android.launcher.R
 import de.jrpie.android.launcher.databinding.ActivitySelectWidgetBinding
 import de.jrpie.android.launcher.preferences.LauncherPreferences
 import de.jrpie.android.launcher.ui.UIObjectActivity
+import de.jrpie.android.launcher.ui.applyKeyboardSettings
 import de.jrpie.android.launcher.ui.transformMonochrome
 import de.jrpie.android.launcher.widgets.ClockWidget
 import de.jrpie.android.launcher.widgets.LauncherAppWidgetProvider
@@ -23,6 +25,7 @@ import de.jrpie.android.launcher.widgets.LauncherClockWidgetProvider
 import de.jrpie.android.launcher.widgets.LauncherWidgetProvider
 import de.jrpie.android.launcher.widgets.WidgetPanel
 import de.jrpie.android.launcher.widgets.WidgetPosition
+import de.jrpie.android.launcher.widgets.WidgetProviderFilter
 import de.jrpie.android.launcher.widgets.bindAppWidgetOrRequestPermission
 import de.jrpie.android.launcher.widgets.generateInternalId
 import de.jrpie.android.launcher.widgets.getAppWidgetProviders
@@ -75,6 +78,15 @@ class SelectWidgetActivity : UIObjectActivity() {
             }
         }
     }
+    private fun updateSortIcon(viewAdapter: SelectWidgetRecyclerAdapter) {
+        binding.selectWidgetSort.setImageResource(
+            if (viewAdapter.sortAlphabetical) {
+                R.drawable.baseline_sort_alpha_24
+            } else {
+                R.drawable.baseline_menu_24
+            }
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,12 +104,34 @@ class SelectWidgetActivity : UIObjectActivity() {
             setHasFixedSize(false)
             layoutManager = viewManager
             adapter = viewAdapter
+
         }
+        applyKeyboardSettings(this, binding.selectWidgetRecycler, binding.selectWidgetSearchview)
 
         binding.selectWidgetClose.setOnClickListener {
             setResult(RESULT_CANCELED)
             finish()
         }
+
+        binding.selectWidgetSort.setOnClickListener {
+            viewAdapter.sortAlphabetical = !viewAdapter.sortAlphabetical
+            updateSortIcon(viewAdapter)
+        }
+        updateSortIcon(viewAdapter)
+
+        binding.selectWidgetSearchview.setOnQueryTextListener(object :
+            SearchView.OnQueryTextListener {
+
+            override fun onQueryTextSubmit(query: String): Boolean {
+                viewAdapter.query = query
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                viewAdapter.query = newText
+                return false
+            }
+        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -118,8 +152,29 @@ class SelectWidgetActivity : UIObjectActivity() {
         private val theme = LauncherPreferences.theme()
         private val colorTheme = theme.colorTheme()
         private val grayscale = colorTheme.monochromeIcons()
+        private val allWidgets = getAppWidgetProviders(this@SelectWidgetActivity)
+        private var widgets = allWidgets
+        private val filter = WidgetProviderFilter("", false)
 
-        private val widgets = getAppWidgetProviders(this@SelectWidgetActivity).toTypedArray()
+        var sortAlphabetical: Boolean
+            get() { return filter.sortAlphabetical }
+            set(value) {
+                filter.sortAlphabetical = value
+                updateWidgetList()
+            }
+
+        var query: String
+            get() { return filter.query }
+            set(value) {
+                filter.query = value
+                updateWidgetList()
+            }
+
+        private fun updateWidgetList() {
+            widgets = filter(allWidgets)
+            @Suppress("NotifyDataSetChanged")
+            notifyDataSetChanged()
+        }
 
         inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
             View.OnClickListener {
